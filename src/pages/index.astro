@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const groups = new Map<string, typeof posts>();
+for (const post of posts) {
+  const list = groups.get(post.data.category) ?? [];
+  list.push(post);
+  groups.set(post.data.category, list);
+}
+
+const categoryHooks: Record<string, string> = {
+  "기내용 캐리어": "항공사 규정에 안 걸리는 사이즈부터 확인하고 고르세요.",
+  "여행 파우치·소품": "짐을 줄이는 게 아니라, 있는 짐을 잘 정리하는 법.",
+};
+---
+<Layout title="기내용 캐리어 가이드" description="항공사별 기내 수하물 규정에 맞춰 캐리어·여행용품을 고르는 방법">
+  <section class="hero">
+    <div>
+      <p class="hero-eyebrow">위탁수하물 없이, 기내 반입만으로 다니는 사람들을 위해</p>
+      <h1>이 캐리어, 그 항공사에서 진짜 괜찮을까?</h1>
+      <p class="hero-sub">캐리어 추천 콘텐츠는 많지만, 항공사 규정과 나란히 비교해주는 곳은 없었습니다. 국내 항공사와 해외 저가항공사의 기내 수하물 규정을 직접 확인하고, 실제로 안 걸리는 사이즈만 추천합니다.</p>
+      <ul class="hero-facts">
+        <li>국내 6개 항공사 + 해외 저가항공사 기내 수하물 규정 직접 확인</li>
+        <li>초과 시 실제 발생하는 추가 요금까지 명시</li>
+        <li>광고 없이, 규정에 맞는 상품만 있는 그대로 비교</li>
+      </ul>
+    </div>
+    <div class="hero-visual">
+      <img src="/images/carry-on-airport.jpg" alt="공항 게이트 창가에서 백팩을 위에 올린 기내용 하드셸 캐리어, 배경으로 활주로와 항공기가 보임" loading="eager" />
+    </div>
+  </section>
+
+  {Array.from(groups.entries()).map(([category, categoryPosts]) => (
+    <section class="category-group">
+      <h2>{category}</h2>
+      {categoryHooks[category] && <p class="category-hook">{categoryHooks[category]}</p>}
+      <ul class="post-list">
+        {categoryPosts.map((post) => (
+          <li>
+            <a class="post-card" href={`/posts/${post.slug}/`}>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <section class="category-group">
+    <h2>항공사 기내 수하물 규정 한눈에 보기</h2>
+    <p class="category-hook">국내·해외 항공사 규정을 표로 바로 비교하고 싶다면.</p>
+    <a class="post-card" href="/airlines/">
+      <h3>전체 항공사 규정 비교표 보기 →</h3>
+    </a>
+  </section>
+</Layout>

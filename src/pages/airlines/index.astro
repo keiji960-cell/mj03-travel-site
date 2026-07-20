@@ -1,0 +1,48 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const airlines = await getCollection('airlines');
+const typeOrder = ['국적기', '국내 LCC', '해외 LCC'];
+const sorted = airlines.sort(
+  (a, b) => typeOrder.indexOf(a.data.type) - typeOrder.indexOf(b.data.type) || a.data.carryOnWeightKg - b.data.carryOnWeightKg
+);
+const lastVerified = airlines
+  .map((a) => a.data.lastVerified)
+  .sort((a, b) => b.valueOf() - a.valueOf())[0]
+  .toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Layout title="항공사별 기내 수하물 규정 비교" description="국내·해외 항공사 기내 휴대 수하물 크기·무게 규정을 한 번에 비교합니다.">
+  <article>
+    <p class="article-meta">규정 데이터 · 최종 확인 {lastVerified}</p>
+    <h1>항공사별 기내 수하물 규정 비교</h1>
+    <p>국내 항공사끼리는 규정이 대부분 비슷하지만(세 변의 합 115cm, 10kg), 해외 저가항공사는 이보다 작거나 가벼운 경우가 많습니다. 특히 <strong>비엣젯 Eco 등급은 7kg</strong>으로, 국내 항공사보다 30% 적습니다.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>항공사</th>
+            <th>유형</th>
+            <th>기내 수하물 크기</th>
+            <th>무게 제한</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((airline) => (
+            <tr class={airline.data.carryOnWeightKg <= 7 ? 'row-warning' : ''}>
+              <td><a href={airline.data.sourceUrl} target="_blank" rel="noopener">{airline.data.name}</a></td>
+              <td>{airline.data.type}</td>
+              <td>{airline.data.carryOnDims}</td>
+              <td>{airline.data.carryOnWeightKg}kg{airline.data.carryOnWeightKg <= 7 && ' ⚠️'}</td>
+              <td>{airline.data.carryOnWeightNote ?? '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="disclaimer">항공사 수하물 규정은 예고 없이 변경될 수 있습니다. 실제 탑승 전 반드시 해당 항공사 공식 페이지(표의 항공사명 링크)에서 최신 규정을 다시 확인하세요. 위 데이터 중 대한항공·아시아나항공·티웨이항공은 공식 페이지 접속이 제한되어 2차 출처(비교 정리 페이지)로 교차 확인했습니다.</p>
+  </article>
+</Layout>
