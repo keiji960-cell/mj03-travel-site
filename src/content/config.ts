@@ -15,10 +15,12 @@ const airlines = defineCollection({
   type: 'content',
   schema: z.object({
     name: z.string(),
-    type: z.enum(['국적기', '국내 LCC', '해외 LCC']),
+    type: z.enum(['국적기', '국내 LCC', '해외 LCC', '해외 대형항공사']),
     // [가장 긴 변, 중간 변, 가장 짧은 변] cm — 항공사마다 표기 순서가 달라 항상 내림차순으로 정규화해서 저장
     dimsCm: z.tuple([z.number(), z.number(), z.number()]),
-    carryOnWeightKg: z.number(),
+    // 미국 대형 항공사처럼 무게 제한 자체가 없는 경우 생략하고 noWeightLimit을 true로
+    carryOnWeightKg: z.number().optional(),
+    noWeightLimit: z.boolean().default(false),
     // 무료로 실을 수 없는 항공사(예: 라이언에어 — Priority 옵션 구매 필요)
     freeCarryOn: z.boolean().default(true),
     weightNote: z.string().optional(),

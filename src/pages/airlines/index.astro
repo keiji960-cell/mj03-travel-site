@@ -7,7 +7,7 @@ const airlines = await getCollection('airlines');
 type Airline = CollectionEntry<'airlines'>['data'];
 
 function signature(a: Airline) {
-  return `${a.dimsCm.join(',')}_${a.carryOnWeightKg}_${a.freeCarryOn}`;
+  return `${a.dimsCm.join(',')}_${a.noWeightLimit ? 'nolimit' : a.carryOnWeightKg}_${a.freeCarryOn}`;
 }
 
 const groupMap = new Map<string, Airline[]>();
@@ -19,8 +19,9 @@ for (const { data } of airlines) {
 }
 
 function riskScore(a: Airline) {
-  const weightPenalty = 10 - a.carryOnWeightKg;
-  return a.freeCarryOn ? weightPenalty : 999;
+  if (!a.freeCarryOn) return 999;
+  if (a.noWeightLimit) return -1;
+  return 10 - (a.carryOnWeightKg ?? 10);
 }
 
 const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
@@ -33,11 +34,15 @@ const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
 // 표시에 필요한 값은 전부 여기서 미리 계산해둔다.
 const rows = sortedGroups.map((members) => {
   const rep = members[0];
-  const isRisky = rep.carryOnWeightKg <= 7 || rep.freeCarryOn === false;
+  const isRisky = rep.freeCarryOn === false || (!rep.noWeightLimit && (rep.carryOnWeightKg ?? 10) <= 7);
   const types = [...new Set(members.map((m) => m.type))].join(' / ');
   const trap = members.find((m) => m.trapNote)?.trapNote ?? '-';
   const dimsLabel = `${rep.dimsCm[0]}×${rep.dimsCm[1]}×${rep.dimsCm[2]}cm`;
-  const weightLabel = rep.freeCarryOn ? `${rep.carryOnWeightKg}kg` : '무료 반입 불가';
+  const weightLabel = !rep.freeCarryOn
+    ? '무료 반입 불가'
+    : rep.noWeightLimit
+      ? '제한 없음'
+      : `${rep.carryOnWeightKg}kg`;
   const names = members.map((m) => ({
     name: m.name,
     sourceUrl: m.sourceUrl,
