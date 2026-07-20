@@ -8,6 +8,7 @@ const posts = defineCollection({
     pubDate: z.date(),
     category: z.string(),
     affiliateLinks: z.array(z.string()).optional(),
+    heroImage: z.string().optional(),
   }),
 });
 

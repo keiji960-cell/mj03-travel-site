@@ -17,8 +17,29 @@ const formattedDate = post.data.pubDate.toLocaleDateString('ko-KR', {
   month: 'long',
   day: 'numeric',
 });
+const isoDate = post.data.pubDate.toISOString();
+const pageURL = new URL(`/posts/${post.slug}/`, Astro.site).href;
+const imageURL = post.data.heroImage
+  ? new URL(post.data.heroImage, Astro.site).href
+  : new URL('/images/carry-on-airport.jpg', Astro.site).href;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: post.data.title,
+  description: post.data.description,
+  image: imageURL,
+  datePublished: isoDate,
+  dateModified: isoDate,
+  mainEntityOfPage: pageURL,
+  publisher: {
+    "@type": "Organization",
+    name: "기내용 캐리어 가이드",
+  },
+};
 ---
-<Layout title={post.data.title} description={post.data.description}>
+<Layout title={post.data.title} description={post.data.description} image={post.data.heroImage} type="article">
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <article>
     <p class="article-meta">{post.data.category} · {formattedDate}</p>
     <h1>{post.data.title}</h1>

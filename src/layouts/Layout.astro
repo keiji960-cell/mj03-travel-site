@@ -4,8 +4,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  type?: "website" | "article";
 }
-const { title, description = "" } = Astro.props;
+const { title, description = "", image = "/images/carry-on-airport.jpg", type = "website" } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const absoluteImageURL = new URL(image, Astro.site);
 ---
 <!doctype html>
 <html lang="ko">
@@ -13,9 +17,17 @@ const { title, description = "" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={absoluteImageURL} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absoluteImageURL} />
     <meta name="google-site-verification" content="4iKbmTttfY4TTKuFXB87OlrbWBL-ZiCbPv2IMiBYZig" />
     <title>{title}</title>
   </head>
