@@ -1,22 +1,61 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
 const airlines = await getCollection('airlines');
-const typeOrder = ['국적기', '국내 LCC', '해외 LCC'];
-const sorted = airlines.sort(
-  (a, b) => typeOrder.indexOf(a.data.type) - typeOrder.indexOf(b.data.type) || a.data.carryOnWeightKg - b.data.carryOnWeightKg
-);
+
+type Airline = CollectionEntry<'airlines'>['data'];
+
+function signature(a: Airline) {
+  return `${a.dimsCm.join(',')}_${a.carryOnWeightKg}_${a.freeCarryOn}`;
+}
+
+const groupMap = new Map<string, Airline[]>();
+for (const { data } of airlines) {
+  const key = signature(data);
+  const list = groupMap.get(key) ?? [];
+  list.push(data);
+  groupMap.set(key, list);
+}
+
+function riskScore(a: Airline) {
+  const weightPenalty = 10 - a.carryOnWeightKg;
+  return a.freeCarryOn ? weightPenalty : 999;
+}
+
+const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
+  const scoreDiff = riskScore(a[0]) - riskScore(b[0]);
+  if (scoreDiff !== 0) return scoreDiff;
+  return b[0].dimsCm[1] - a[0].dimsCm[1];
+});
+
+// 템플릿 안에서 비교 연산자를 직접 쓰면 Astro 파서가 태그 시작으로 오인하는 경우가 있어,
+// 표시에 필요한 값은 전부 여기서 미리 계산해둔다.
+const rows = sortedGroups.map((members) => {
+  const rep = members[0];
+  const isRisky = rep.carryOnWeightKg <= 7 || rep.freeCarryOn === false;
+  const types = [...new Set(members.map((m) => m.type))].join(' / ');
+  const trap = members.find((m) => m.trapNote)?.trapNote ?? '-';
+  const dimsLabel = `${rep.dimsCm[0]}×${rep.dimsCm[1]}×${rep.dimsCm[2]}cm`;
+  const weightLabel = rep.freeCarryOn ? `${rep.carryOnWeightKg}kg` : '무료 반입 불가';
+  const names = members.map((m) => ({
+    name: m.name,
+    sourceUrl: m.sourceUrl,
+    note: m.weightNote ?? null,
+  }));
+  return { isRisky, types, trap, dimsLabel, weightLabel, names };
+});
+
 const lastVerified = airlines
   .map((a) => a.data.lastVerified)
   .sort((a, b) => b.valueOf() - a.valueOf())[0]
   .toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
-<Layout title="항공사별 기내 수하물 규정 비교" description="국내·해외 항공사 기내 휴대 수하물 크기·무게 규정을 한 번에 비교합니다.">
+<Layout title="항공사별 기내 수하물 규정 비교" description="국내·해외 항공사 기내 휴대 수하물 크기·무게 규정을 규정이 같은 항공사끼리 묶어서 비교합니다.">
   <article>
     <p class="article-meta">규정 데이터 · 최종 확인 {lastVerified}</p>
     <h1>항공사별 기내 수하물 규정 비교</h1>
-    <p>국내 항공사끼리는 규정이 대부분 비슷하지만(세 변의 합 115cm, 10kg), 해외 저가항공사는 이보다 작거나 가벼운 경우가 많습니다. 특히 <strong>비엣젯 Eco 등급은 7kg</strong>으로, 국내 항공사보다 30% 적습니다.</p>
+    <p>총 {airlines.length}개 항공사를 조사해, <strong>같은 규정을 쓰는 항공사는 한 행으로 묶고</strong> 실제로 다른 규정끼리만 구분했습니다. 국내 항공사끼리는 규정이 대부분 비슷하지만(세 변의 합 115cm, 10kg), 해외 저가항공사로 갈수록 크기·무게·심지어 "무료 여부"까지 달라집니다.</p>
 
     <div class="table-scroll">
       <table>
@@ -30,13 +69,21 @@ const lastVerified = airlines
           </tr>
         </thead>
         <tbody>
-          {sorted.map((airline) => (
-            <tr class={airline.data.carryOnWeightKg <= 7 ? 'row-warning' : ''}>
-              <td><a href={airline.data.sourceUrl} target="_blank" rel="noopener">{airline.data.name}</a></td>
-              <td>{airline.data.type}</td>
-              <td>{airline.data.carryOnDims}</td>
-              <td>{airline.data.carryOnWeightKg}kg{airline.data.carryOnWeightKg <= 7 && ' ⚠️'}</td>
-              <td>{airline.data.carryOnWeightNote ?? '-'}</td>
+          {rows.map((row) => (
+            <tr class={row.isRisky ? 'row-warning' : ''}>
+              <td>
+                {row.names.map((n, i) => (
+                  <Fragment>
+                    {i > 0 ? ' · ' : ''}
+                    <a href={n.sourceUrl} target="_blank" rel="noopener">{n.name}</a>
+                    {n.note ? <span class="cell-note"> ({n.note})</span> : null}
+                  </Fragment>
+                ))}
+              </td>
+              <td>{row.types}</td>
+              <td>{row.dimsLabel}</td>
+              <td>{row.weightLabel}{row.isRisky ? ' ⚠️' : ''}</td>
+              <td>{row.trap}</td>
             </tr>
           ))}
         </tbody>

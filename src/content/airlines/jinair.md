@@ -1,9 +1,9 @@
 ---
 name: "진에어"
 type: "국내 LCC"
-carryOnDims: "55×40×20cm (세 변의 합 115cm 이내)"
+dimsCm: [55, 40, 20]
 carryOnWeightKg: 10
-carryOnWeightNote: "일부 노선은 12kg까지 허용"
+weightNote: "일부 노선 12kg"
 sourceUrl: "https://www.jinair.com"
 lastVerified: 2026-07-20
 ---

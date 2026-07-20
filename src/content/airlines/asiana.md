@@ -1,7 +1,7 @@
 ---
 name: "아시아나항공"
 type: "국적기"
-carryOnDims: "55×40×20cm (세 변의 합 115cm 이내)"
+dimsCm: [55, 40, 20]
 carryOnWeightKg: 10
 sourceUrl: "https://m.flyasiana.com/C/KR/KO/contents/carry-on-baggage"
 lastVerified: 2026-07-20

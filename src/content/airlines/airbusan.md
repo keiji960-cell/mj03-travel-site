@@ -1,7 +1,7 @@
 ---
 name: "에어부산"
 type: "국내 LCC"
-carryOnDims: "55×40×20cm (세 변의 합 115cm 이내)"
+dimsCm: [55, 40, 20]
 carryOnWeightKg: 10
 sourceUrl: "https://www.airbusan.com"
 lastVerified: 2026-07-20

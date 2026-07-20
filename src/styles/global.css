@@ -269,6 +269,19 @@ p {
   color: inherit;
 }
 
+.callout {
+  margin: var(--space-3) 0 var(--space-4);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
 .diagram {
   margin: var(--space-3) 0 var(--space-4);
   padding: var(--space-2);
@@ -309,7 +322,6 @@ article td,
   border: 1px solid var(--color-border);
   padding: var(--space-1) var(--space-2);
   text-align: left;
-  white-space: nowrap;
 }
 
 article th,
@@ -324,6 +336,11 @@ article th,
 
 .row-warning td:first-child {
   border-left: 3px solid var(--color-warning-border);
+}
+
+.cell-note {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
 }
 
 article ul,

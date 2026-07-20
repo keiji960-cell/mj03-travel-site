@@ -1,7 +1,7 @@
 ---
 name: "티웨이항공"
 type: "국내 LCC"
-carryOnDims: "55×40×20cm"
+dimsCm: [55, 40, 20]
 carryOnWeightKg: 10
 sourceUrl: "https://m.twayair.com/app/serviceInfo/contents/148"
 lastVerified: 2026-07-20

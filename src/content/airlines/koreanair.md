@@ -1,7 +1,7 @@
 ---
 name: "대한항공"
 type: "국적기"
-carryOnDims: "55×40×20cm (세 변의 합 115cm 이내)"
+dimsCm: [55, 40, 20]
 carryOnWeightKg: 10
 personalItemDims: "40×30×15cm"
 sourceUrl: "https://www.koreanair.com/contents/plan-your-travel/baggage/carry-on-baggage"

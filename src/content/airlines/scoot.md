@@ -1,7 +1,7 @@
 ---
 name: "스쿠트항공"
 type: "해외 LCC"
-carryOnDims: "54×38×23cm (총 선형 크기 115cm 이내)"
+dimsCm: [54, 38, 23]
 carryOnWeightKg: 10
 personalItemDims: "40×30×10cm"
 sourceUrl: "https://www.flyscoot.com/ko/plan/booking-your-flight/baggage"
