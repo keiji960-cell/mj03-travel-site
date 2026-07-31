@@ -30,6 +30,11 @@ const absoluteImageURL = new URL(image, Astro.site);
     <meta name="twitter:image" content={absoluteImageURL} />
     <meta name="google-site-verification" content="4iKbmTttfY4TTKuFXB87OlrbWBL-ZiCbPv2IMiBYZig" />
     <title>{title}</title>
+    <!-- Vercel Web Analytics (Vercel 대시보드에서 Web Analytics 활성화 필요) -->
+    <script is:inline>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
   </head>
   <body>
     <header class="site-header">
